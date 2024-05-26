@@ -100,6 +100,9 @@
 <h3>Rewards</h3>
 <p>Rewards are credited on a per-user basis. Mods are able to modify the specific rewards granted at approval time.</p>
 <p>You can add loot tables containing any kind of currencies (both user- and character-attached), but be sure to keep track of which are being distributed! Character-only currencies cannot be given to users.</p>
+@if(!$prompt->id)
+    <p>You can create <strong>periodic</strong> rewards once the prompt has been made.</p>
+@endif
 @include('widgets._loot_select', ['loots' => $prompt->rewards, 'showLootTables' => true, 'showRaffles' => true])
 
 <div class="text-right">
@@ -108,7 +111,9 @@
 
 {!! Form::close() !!}
 
-@include('widgets._periodic_loot_select', ['groups' => $prompt->periodicRewards, 'object' => $prompt, 'type' => 'submission'])
+@if($prompt->id)
+    @include('widgets._periodic_loot_select', ['groups' => $prompt->periodicRewards, 'object' => $prompt, 'type' => 'submission'])
+@endif
 
 @include('widgets._loot_select_row', ['items' => $items, 'currencies' => $currencies, 'tables' => $tables, 'raffles' => $raffles, 'showLootTables' => true, 'showRaffles' => true])
 

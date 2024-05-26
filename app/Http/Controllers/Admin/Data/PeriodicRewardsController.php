@@ -13,6 +13,7 @@ use App\Models\User\User;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use App\Models\PeriodicRewardLog;
 
 class PeriodicRewardsController extends Controller
 {
@@ -57,7 +58,7 @@ class PeriodicRewardsController extends Controller
                         throw new \Exception('One or more of the groups was not given a quantity or was set to 0 or less.');
                     }
 
-                    $operators = array("<", "=", ">","!=","<=",">=");
+                    $operators = array("<", "=", ">", "!=", "<=", ">=");
                     if (!$data['group_operator'][$key] || !in_array($data['group_operator'][$key], $operators)) {
                         throw new \Exception('One or more of the groups was not given a valid operator.');
                     }
@@ -214,11 +215,11 @@ class PeriodicRewardsController extends Controller
                     $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
                 } elseif ($reward->group_operator === '<' && $logs < $reward->group_quantity) {
                     $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                }elseif ($reward->group_operator === '!=' && $logs != $reward->group_quantity) {
+                } elseif ($reward->group_operator === '!=' && $logs != $reward->group_quantity) {
                     $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                }elseif ($reward->group_operator === '<=' && $logs <= $reward->group_quantity) {
+                } elseif ($reward->group_operator === '<=' && $logs <= $reward->group_quantity) {
                     $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                }elseif ($reward->group_operator === '>=' && $logs >= $reward->group_quantity) {
+                } elseif ($reward->group_operator === '>=' && $logs >= $reward->group_quantity) {
                     $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
                 }
 
@@ -247,5 +248,41 @@ class PeriodicRewardsController extends Controller
             throw new \Exception("Failed to distribute rewards to user.");
         }
         flash('Periodic rewards granted successfully.')->success();
+    }
+
+    /**
+     * Create a log (for logless things)
+     *
+     * @param  array $data
+     * @return array
+     */
+    private function makeLog($object, $user)
+    {
+        DB::beginTransaction();
+
+        try {
+            if (!$object) {
+                throw new \Exception("Invalid object.");
+            }
+
+            if (!$user) {
+                throw new \Exception("Invalid user.");
+            }
+
+            // make a log of the action.
+            $Log = PeriodicRewardLog::create([
+                'object_id' => $object->id,
+                'object_type' => class_basename($object),
+                'user_id' => $user->id,
+            ]);
+
+            DB::commit();
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollback();
+            flash($e->getMessage())->error();
+            return redirect()->back();
+        }
     }
 }

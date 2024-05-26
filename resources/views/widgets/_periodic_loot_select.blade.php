@@ -48,9 +48,14 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 {!! Form::label('group_operator[]', 'Reward Operator') !!}
-                                                {!! Form::select('group_operator[]', ['>' => '> (Greater Than Quantity)', '=' => '= (Equal To Quantity)', '<' => '< (Less Than Quantity)', '!=' => '!= (Not Equal To Quantity)', '<=' => '<= (Less Than OR Equal To Quantity)', '>=' => '>= (Greater Than OR Equal To Quantity)'], $group->group_operator, [
-                                                    'class' => 'form-control mr-2 group-rewardable-min',
-                                                ]) !!}
+                                                {!! Form::select(
+                                                    'group_operator[]',
+                                                    ['>' => '> (Greater Than Quantity)', '=' => '= (Equal To Quantity)', '<' => '< (Less Than Quantity)', '!=' => '!= (Not Equal To Quantity)', '<=' => '<= (Less Than OR Equal To Quantity)', '>=' => '>= (Greater Than OR Equal To Quantity)'],
+                                                    $group->group_operator,
+                                                    [
+                                                        'class' => 'form-control mr-2 group-rewardable-min',
+                                                    ],
+                                                ) !!}
                                             </div>
                                         </div>
                                     </div>
@@ -147,9 +152,14 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 {!! Form::label('group_operator[]', 'Reward Operator') !!}
-                                {!! Form::select('group_operator[]', ['>' => '> (Greater Than Quantity)', '=' => '= (Equal To Quantity)', '<' => '< (Less Than Quantity)', '!=' => '!= (Not Equal To Quantity)', '<=' => '<= (Less Than OR Equal To Quantity)', '>=' => '>= (Greater Than OR Equal To Quantity)'], null, [
-                                    'class' => 'form-control mr-2 group-rewardable-min',
-                                ]) !!}
+                                {!! Form::select(
+                                    'group_operator[]',
+                                    ['>' => '> (Greater Than Quantity)', '=' => '= (Equal To Quantity)', '<' => '< (Less Than Quantity)', '!=' => '!= (Not Equal To Quantity)', '<=' => '<= (Less Than OR Equal To Quantity)', '>=' => '>= (Greater Than OR Equal To Quantity)'],
+                                    null,
+                                    [
+                                        'class' => 'form-control mr-2 group-rewardable-min',
+                                    ],
+                                ) !!}
                             </div>
                         </div>
                     </div>
