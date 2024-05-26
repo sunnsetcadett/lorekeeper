@@ -85,6 +85,14 @@ class Prompt extends Model
         return $this->hasMany('App\Models\Prompt\PromptReward', 'prompt_id');
     }
 
+    /**
+     * Get the rewards attached to this prompt.
+     */
+    public function periodicRewards()
+    {
+        return $this->hasMany('App\Models\PeriodicReward', 'object_id')->where('object_type',class_basename($this));
+    }
+
     /**********************************************************************************************
 
         SCOPES

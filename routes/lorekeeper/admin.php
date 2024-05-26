@@ -226,6 +226,9 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('prompts/create', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/edit/{id?}', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/delete/{id}', 'PromptController@postDeletePrompt');
+
+    # PERIODIC REWARDS
+    Route::post('periodic-rewards/edit/{model}/{id}', 'PeriodicRewardsController@editPeriodicReward');
 });
 
 

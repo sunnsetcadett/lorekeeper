@@ -108,6 +108,8 @@
 
 {!! Form::close() !!}
 
+@include('widgets._periodic_loot_select', ['groups' => $prompt->periodicRewards, 'object' => $prompt, 'type' => 'submission'])
+
 @include('widgets._loot_select_row', ['items' => $items, 'currencies' => $currencies, 'tables' => $tables, 'raffles' => $raffles, 'showLootTables' => true, 'showRaffles' => true])
 
 @if($prompt->id)

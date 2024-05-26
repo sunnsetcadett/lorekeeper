@@ -21,6 +21,7 @@ use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Prompt\Prompt;
+use App\Http\Controllers\Admin\Data\PeriodicRewardsController;
 
 class SubmissionManager extends Service
 {
@@ -403,6 +404,11 @@ class SubmissionManager extends Service
 
             // Distribute user rewards
             if(!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData)) throw new \Exception("Failed to distribute rewards to user.");
+
+            //grant periodic rewards if applicable
+            if($submission->prompt_id && $submission->prompt->periodicRewards->count()){
+                (new PeriodicRewardsController)->grantPeriodicRewards($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::submitted($submission->prompt_id, $submission->user->id)->count());
+            }
 
             // Retrieve all reward IDs for characters
             $currencyIds = []; $itemIds = []; $tableIds = [];
