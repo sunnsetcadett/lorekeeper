@@ -42,25 +42,58 @@
 		</div></div>
 @endif
 
-<h2>Rewards</h2>
-<table class="table table-sm">
-    <thead>
-        <tr>
-            <th width="70%">Reward</th>
-            <th width="30%">Amount</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach(parseAssetData( isset($submission->data['rewards']) ? $submission->data['rewards'] : $submission->data ) as $type)
-            @foreach($type as $asset)
-                <tr>
-                    <td>{!! $asset['asset'] ? $asset['asset']->displayName : 'Deleted Asset' !!}</td>
-                    <td>{{ $asset['quantity'] }}</td>
-                </tr>
-            @endforeach
-        @endforeach
-    </tbody>
-</table>
+@if (array_filter(parseAssetData(isset($submission->data['rewards']) ? $submission->data['rewards'] : $submission->data)))
+    <div class="card mb-3">
+        <div class="card-header h2">Rewards</div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead class="thead-light">
+                    <tr>
+                        <th width="70%">Reward</th>
+                        <th width="30%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (parseAssetData(isset($submission->data['rewards']) ? $submission->data['rewards'] : $submission->data) as $type)
+                        @foreach ($type as $asset)
+                            <tr>
+                                <td>{!! $asset['asset'] ? $asset['asset']->displayName : 'Deleted Asset' !!}</td>
+                                <td>{{ $asset['quantity'] }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endif
+
+@if (array_filter(parseAssetData(isset($submission->data['periodicrewards']) ? $submission->data['periodicrewards'] : $submission->data)))
+    <div class="card mb-3">
+        <div class="card-header h2">Bonus Rewards</div>
+        <div class="card-body">
+        <p>You recieved these for submitting a certain amount of times.</p>
+            <table class="table table-sm">
+                <thead class="thead-light">
+                    <tr>
+                        <th width="70%">Reward</th>
+                        <th width="30%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (parseAssetData(isset($submission->data['periodicrewards']) ? $submission->data['periodicrewards'] : $submission->data) as $type)
+                        @foreach ($type as $asset)
+                            <tr>
+                                <td>{!! $asset['asset'] ? $asset['asset']->displayName : 'Deleted Asset' !!}</td>
+                                <td>{{ $asset['quantity'] }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endif
 
 <h2>Characters</h2>
 @foreach($submission->characters as $character)

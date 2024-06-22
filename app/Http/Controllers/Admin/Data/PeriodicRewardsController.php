@@ -68,11 +68,8 @@ class PeriodicRewardsController extends Controller
                         'group_operator' => $data['group_operator'][$key],
                         'group_quantity' => $data['group_quantity'][$key],
                     ];
-
                 }
-            } else {
-                throw new \Exception('You cannot make a periodic reward with no reward groups...');
-            }
+            }  
 
             // Retrieve all reward IDs for groups
             $currencyIds = [];
@@ -96,7 +93,7 @@ class PeriodicRewardsController extends Controller
                         }
                     }
                 }
-            } else {
+            } elseif(isset($data['group_name'])) {
                 throw new \Exception('Cannot make a group with no rewards.');
             }
 
@@ -209,25 +206,24 @@ class PeriodicRewardsController extends Controller
 
             foreach ($object->periodicRewards as $reward) {
                 //check log count
-                if ($reward->group_operator === '>' && $logs > $reward->group_quantity) {
-                    $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                } elseif ($reward->group_operator === '=' && $logs == $reward->group_quantity) {
-                    $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                } elseif ($reward->group_operator === '<' && $logs < $reward->group_quantity) {
-                    $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                } elseif ($reward->group_operator === '!=' && $logs != $reward->group_quantity) {
-                    $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                } elseif ($reward->group_operator === '<=' && $logs <= $reward->group_quantity) {
-                    $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
-                } elseif ($reward->group_operator === '>=' && $logs >= $reward->group_quantity) {
-                    $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
+                if ($reward->group_operator === '>' && $logs > $reward->group_quantity ||$reward->group_operator === '=' && $logs == $reward->group_quantity ||$reward->group_operator === '<' && $logs < $reward->group_quantity ||$reward->group_operator === '!=' && $logs != $reward->group_quantity ||$reward->group_operator === '<=' && $logs <= $reward->group_quantity ||$reward->group_operator === '>=' && $logs >= $reward->group_quantity) {
+                    $grantable = true; 
+                }
+
+                if(isset($grantable)){
+                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
                 }
 
             }
 
             DB::commit();
 
+            if(isset($grantable)){
+                return $grant;
+            }
+
             return redirect()->back();
+
         } catch (\Exception $e) {
             DB::rollback();
             flash($e->getMessage())->error();
@@ -243,11 +239,23 @@ class PeriodicRewardsController extends Controller
      */
     private function grantRewards($reward, $user, $recipient, $logtype, $logdata)
     {
+        
+        DB::beginTransaction();
+
+        try {
         // Distribute user rewards
         if (!$rewards = fillUserAssets(parseAssetData($reward->data), $user, $recipient, $logtype, $logdata)) {
             throw new \Exception("Failed to distribute rewards to user.");
         }
         flash('Periodic rewards granted successfully.')->success();
+        DB::commit();
+
+            return $rewards;
+        } catch (\Exception $e) {
+            DB::rollback();
+            flash($e->getMessage())->error();
+            return redirect()->back();
+        }
     }
 
     /**

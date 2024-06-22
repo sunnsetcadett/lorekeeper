@@ -407,7 +407,7 @@ class SubmissionManager extends Service
 
             //grant periodic rewards if applicable
             if($submission->prompt_id && $submission->prompt->periodicRewards->count()){
-                (new PeriodicRewardsController)->grantPeriodicRewards($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::submitted($submission->prompt_id, $submission->user->id)->count());
+                $periodicrewards = ( new PeriodicRewardsController)->grantPeriodicRewards($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::submitted($submission->prompt_id, $submission->user->id)->count());
             }
 
             // Retrieve all reward IDs for characters
@@ -478,7 +478,8 @@ class SubmissionManager extends Service
                 'status' => 'Approved',
                 'data' => json_encode([
                     'user' => $addonData,
-                    'rewards' => getDataReadyAssets($rewards)
+                    'rewards' => getDataReadyAssets($rewards),
+                    'periodicrewards' => isset($periodicrewards) ? getDataReadyAssets($periodicrewards) : null
                     ]) // list of rewards
             ]);
 

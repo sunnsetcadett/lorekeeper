@@ -197,10 +197,10 @@
                 ]) !!}
             </td>
             <td class="lootDivs">
-                <div class="group-currencies hide">{!! Form::select('group_currency_id[]', $currencies, 0, ['class' => 'form-control group-currency-id', 'placeholder' => 'Select Currency']) !!}</div>
-                <div class="group-items hide">{!! Form::select('group_item_id[]', $items, 0, ['class' => 'form-control group-item-id', 'placeholder' => 'Select Item']) !!}</div>
-                <div class="group-tables hide">{!! Form::select('group_rewardable_id[]', $tables, 0, ['class' => 'form-control group-table-id', 'placeholder' => 'Select Loot Table']) !!}</div>
-                <div class="group-raffles hide">{!! Form::select('group_rewardable_id[]', $raffles, 0, ['class' => 'form-control group-raffle-id', 'placeholder' => 'Select Raffle']) !!}</div>
+                <div class="group-currencies hide">{!! Form::select('group_currency_id[]', $currencies, 0, ['class' => 'form-control group-currency-id selectize', 'placeholder' => 'Select Currency']) !!}</div>
+                <div class="group-items hide">{!! Form::select('group_item_id[]', $items, 0, ['class' => 'form-control group-item-id selectize', 'placeholder' => 'Select Item']) !!}</div>
+                <div class="group-tables hide">{!! Form::select('group_rewardable_id[]', $tables, 0, ['class' => 'form-control group-table-id selectize', 'placeholder' => 'Select Loot Table']) !!}</div>
+                <div class="group-raffles hide">{!! Form::select('group_rewardable_id[]', $raffles, 0, ['class' => 'form-control group-raffle-id selectize', 'placeholder' => 'Select Raffle']) !!}</div>
             </td>
 
             <td class="d-flex align-items-center">
@@ -251,6 +251,7 @@
                 });
                 updateRewardNames($clone, node.find('.group-name').val());
                 $(this).parent().parent().find('.group-rewards').append($clone);
+                $clone.find('.selectize').selectize();
                 attachRewardTypeListener(node.find('.group-rewardable-type'));
             });
             attachRewardTypeListener(node.find('.group-rewardable-type'));
