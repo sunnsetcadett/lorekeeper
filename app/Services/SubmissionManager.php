@@ -21,7 +21,7 @@ use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Prompt\Prompt;
-use App\Http\Controllers\Admin\Data\PeriodicRewardsController;
+use App\Services\PeriodicRewardsManager;
 
 class SubmissionManager extends Service
 {
@@ -407,7 +407,11 @@ class SubmissionManager extends Service
 
             //grant periodic rewards if applicable
             if($submission->prompt_id && $submission->prompt->periodicRewards->count()){
-                $periodicrewards = ( new PeriodicRewardsController)->grantPeriodicRewards($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::submitted($submission->prompt_id, $submission->user->id)->count());
+                $periodicrewards = ( new PeriodicRewardsManager)->grantPeriodicReward($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::submitted($submission->prompt_id, $submission->user->id)->get());
+
+                if(is_bool($periodicrewards)){
+                    $periodicrewards = [];
+                }
             }
 
             // Retrieve all reward IDs for characters
@@ -479,7 +483,7 @@ class SubmissionManager extends Service
                 'data' => json_encode([
                     'user' => $addonData,
                     'rewards' => getDataReadyAssets($rewards),
-                    'periodicrewards' => isset($periodicrewards) ? getDataReadyAssets($periodicrewards) : null
+                    'periodicrewards' => isset($periodicrewards) && $periodicrewards ? getDataReadyAssets($periodicrewards) : null
                     ]) // list of rewards
             ]);
 

@@ -53,44 +53,7 @@
                 </table>
             @endif
             @if (count($prompt->periodicRewards))
-                <h4>Bonus Rewards</h4>
-                @foreach ($prompt->periodicRewards as $group)
-                    @if (array_filter(parseAssetData($group->data)))
-                        <p>Only gives reward if your submission count is <strong>{{ $group->group_operator == '=' ? 'equal to' : ($group->group_operator == '>' ? 'greater than' : ($group->group_operator == '<' ? 'less than' : ($group->group_operator == '!=' ? 'not equal to' : ($group->group_operator == '<=' ? 'less than OR equal to' : ($group->group_operator == '>=' ? 'greater than OR equal to' : []))))) }}</strong>
-                            {{ $group->group_quantity }}.</p>
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th width="70%">Reward</th>
-                                    <th width="30%">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (parseAssetData($group->data) as $key => $type)
-                                    @if (count($type))
-                                        <tr>
-                                            <td colspan="2"><strong>{!! strtoupper($key) !!}</strong></td>
-                                        </tr>
-                                        @foreach ($type as $asset)
-                                            <tr>
-                                                <td>{!! $asset['asset']->displayName !!}</td>
-                                                <td>{{ $asset['quantity'] }}</td>
-                                            </tr>
-                                        @endforeach
-                                    @endif
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <hr class="my-4 w-75" />
-                    @else
-                        <p>An error occurred. Contact an admin.</p>
-                    @endif
-                @endforeach
-                @if (Auth::check())
-                    <div class="text-center">
-                        <strong>Your current count:</strong> {{ \App\Models\Submission\Submission::submitted($prompt->id, Auth::user()->id)->count() }}
-                    </div>
-                @endif
+                @include('widgets._periodic_loot_rewards', ['object' => $prompt, 'act_type' => 'submission', 'logs' => \App\Models\Submission\Submission::submitted($prompt->id, Auth::user()->id)->get()])
             @endif
         </div>
         <div class="text-right">

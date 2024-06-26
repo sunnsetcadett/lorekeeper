@@ -5,21 +5,21 @@ namespace App\Models;
 use App\Models\Model;
 use App\Services\PeriodicRewardsManager;
 
-class PeriodicReward extends Model
+class PeriodicDefault extends Model
 {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['object_id', 'object_type', 'data', 'group_name', 'group_operator', 'group_quantity', 'reward_timeframe'];
+    protected $fillable = ['name', 'summary'];
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'periodic_rewards';
+    protected $table = 'periodic_defaults';
 
     /**********************************************************************************************
 
@@ -28,17 +28,12 @@ class PeriodicReward extends Model
      **********************************************************************************************/
 
     /**
-     * Get the attachments.
+     * Get the rewards attached to this prompt.
      */
-    public function object()
+    public function periodicRewards()
     {
-        switch ($this->object_type) {
-            case 'Prompt':
-                return $this->belongsTo('App\Models\Prompt\Prompt', 'object_id');
-        }
-        return null;
+        return $this->hasMany('App\Models\PeriodicReward', 'object_id')->where('object_type',class_basename($this));
     }
-
     /**********************************************************************************************
 
     ACCESSORS
@@ -142,7 +137,7 @@ class PeriodicReward extends Model
     public function displayCount($reward, $logs)
     {
         if ($this->reward_timeframe !== 'lifetime') {
-            return (new PeriodicRewardsManager)->checkLogDates($reward, $logs)->count();
+            return (new PeriodicRewardsManager)->checkLogDates($reward, $logs);
         } else {
             return $logs->count();
         }

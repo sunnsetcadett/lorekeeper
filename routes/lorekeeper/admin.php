@@ -229,6 +229,14 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
 
     # PERIODIC REWARDS
     Route::post('periodic-rewards/edit/{model}/{id}', 'PeriodicRewardsController@editPeriodicReward');
+    
+    Route::get('periodic-defaults', 'PeriodicRewardsController@getDefaultIndex');
+    Route::get('periodic-defaults/create', 'PeriodicRewardsController@getCreateEditPeriodicDefault');
+    Route::post('periodic-defaults/create', 'PeriodicRewardsController@postCreateEditPeriodicDefault');
+    Route::get('periodic-defaults/edit/{id}', 'PeriodicRewardsController@getCreateEditPeriodicDefault');
+    Route::post('periodic-defaults/edit/{id}', 'PeriodicRewardsController@postCreateEditPeriodicDefault');
+    Route::get('periodic-defaults/delete/{id}', 'PeriodicRewardsController@getDeletePeriodicDefault');
+    Route::post('periodic-defaults/delete/{id}', 'PeriodicRewardsController@postDeletePeriodicDefault');
 });
 
 

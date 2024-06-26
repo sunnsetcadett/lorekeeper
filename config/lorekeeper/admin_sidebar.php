@@ -176,6 +176,10 @@ return [
                 'name' => 'Items',
                 'url' => 'admin/data/items'
             ],
+            [
+                'name' => 'Periodic Reward Defaults',
+                'url' => 'admin/data/periodic-defaults'
+            ],
         ]
     ],
     'Raffles' => [

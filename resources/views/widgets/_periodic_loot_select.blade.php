@@ -1,5 +1,6 @@
 {!! Form::open(['url' => 'admin/data/periodic-rewards/edit/' . base64_encode(urlencode(get_class($object))) . '/' . $object->id]) !!}
 
+
 @php
     // This file represents a common source and definition for assets used in loot_select
     // While it is not per se as tidy as defining these in the controller(s),
@@ -13,6 +14,25 @@
 <hr style="margin-top: 3em;">
 
 <div class="card mb-3">
+    @if (!isset($default))
+        <div class="card-header h2">
+            Populate Default Periodic Rewards
+        </div>
+        <div class="card-body" style="clear:both;">
+            <p>You can populate this with the selected defaults.</p>
+            @php
+                $defaults = \App\Models\PeriodicDefault::orderBy('name')->get();
+            @endphp
+            <div class="row">
+                @foreach ($defaults as $default)
+                    <div class="col-md form-group">
+                        {!! Form::checkbox('default_periodic_rewards[' . $default->id . ']', 1, 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                        {!! Form::label('default_periodic_rewards[' . $default->id . ']', $default->name, ['class' => 'form-check-label ml-3']) !!} {!! add_help('Toggle on to populate this reward set.') !!}
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
     <div class="card-header h2">
         <a href="#" class="btn btn-outline-info float-right" id="addGroup">Add Group</a>
         Periodic Rewards
@@ -36,6 +56,8 @@
                                     <p class="text-center">Set a number of {{ $type }}s, as well as math operator. As long as the user's {{ $type }}s are logged (if adding this somewhere else), then rewards will be distributed
                                         according to these specifications.</p>
                                     <p class="text-center">For example: If you set quantity to 1 and the operator as =, the user will only get the chosen rewards if this is their first {{ $type }}.</p>
+                                    <p class="text-center">When adding a timeframe, {{ $type }}s will <strong>only</strong> be counted during that timeframe. Yearly will only look at {{ $type }}s made after the beginning of the
+                                        current year. Weekly starts on Sunday. Rollover will happen on UTC time.</p>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -50,13 +72,27 @@
                                                 {!! Form::label('group_operator[]', 'Reward Operator') !!}
                                                 {!! Form::select(
                                                     'group_operator[]',
-                                                    ['>' => '> (Greater Than Quantity)', '=' => '= (Equal To Quantity)', '<' => '< (Less Than Quantity)', '!=' => '!= (Not Equal To Quantity)', '<=' => '<= (Less Than OR Equal To Quantity)', '>=' => '>= (Greater Than OR Equal To Quantity)'],
+                                                    [
+                                                        '>' => '> (Greater Than Quantity)',
+                                                        '=' => '= (Equal To Quantity)',
+                                                        '<' => '< (Less Than Quantity)',
+                                                        '!=' => '!= (Not Equal To Quantity)',
+                                                        '<=' => '<= (Less Than OR Equal To Quantity)',
+                                                        '>=' => '>= (Greater Than OR Equal To Quantity)',
+                                                        'every' => 'Every (Quantity)',
+                                                    ],
                                                     $group->group_operator,
                                                     [
                                                         'class' => 'form-control mr-2 group-rewardable-min',
                                                     ],
                                                 ) !!}
                                             </div>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            {!! Form::label('reward_timeframe[]', 'Reward Limit Timeframe') !!}
+                                            {!! Form::select('reward_timeframe[]', ['lifetime' => 'Lifetime', 'yearly' => 'Yearly', 'monthly' => 'Monthly', 'weekly' => 'Weekly', 'daily' => 'Daily'], $group->reward_timeframe, [
+                                                'class' => 'form-control',
+                                            ]) !!}
                                         </div>
                                     </div>
                                     <div class="group-rewards">
@@ -140,6 +176,8 @@
                     <p class="text-center">Set a number of {{ $type }}s, as well as math operator. As long as the user's {{ $type }}s are logged (if adding this somewhere else), then rewards will be distributed according to these
                         specifications.</p>
                     <p class="text-center">For example: If you set quantity to 1 and the operator as =, the user will only get the chosen rewards if this is their first {{ $type }}.</p>
+                    <p class="text-center">When adding a timeframe, {{ $type }}s will <strong>only</strong> be counted during that timeframe. Yearly will only look at {{ $type }}s made after the beginning of the current year. Weekly
+                        starts on Sunday. Rollover will happen on UTC time.</p>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -154,13 +192,27 @@
                                 {!! Form::label('group_operator[]', 'Reward Operator') !!}
                                 {!! Form::select(
                                     'group_operator[]',
-                                    ['>' => '> (Greater Than Quantity)', '=' => '= (Equal To Quantity)', '<' => '< (Less Than Quantity)', '!=' => '!= (Not Equal To Quantity)', '<=' => '<= (Less Than OR Equal To Quantity)', '>=' => '>= (Greater Than OR Equal To Quantity)'],
+                                    [
+                                        '>' => '> (Greater Than Quantity)',
+                                        '=' => '= (Equal To Quantity)',
+                                        '<' => '< (Less Than Quantity)',
+                                        '!=' => '!= (Not Equal To Quantity)',
+                                        '<=' => '<= (Less Than OR Equal To Quantity)',
+                                        '>=' => '>= (Greater Than OR Equal To Quantity)',
+                                        'every' => 'Every (Quantity)',
+                                    ],
                                     null,
                                     [
                                         'class' => 'form-control mr-2 group-rewardable-min',
                                     ],
                                 ) !!}
                             </div>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            {!! Form::label('reward_timeframe[]', 'Reward Limit Timeframe') !!}
+                            {!! Form::select('reward_timeframe[]', ['lifetime' => 'Lifetime', 'yearly' => 'Yearly', 'monthly' => 'Monthly', 'weekly' => 'Weekly', 'daily' => 'Daily'], null, [
+                                'class' => 'form-control',
+                            ]) !!}
                         </div>
                     </div>
                     <div class="col-md-10">
