@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\PeriodicRewardsManager;
 use Illuminate\Http\Request;
 use App\Models\PeriodicDefault;
+use App\Services\Service;
 
 class PeriodicRewardsController extends Controller
 {
@@ -25,7 +26,7 @@ class PeriodicRewardsController extends Controller
      * @param  int|null                    $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function editPeriodicReward(Request $request, $model, $id)
+    public function editPeriodicReward(Request $request, PeriodicRewardsManager $service, $model, $id)
     {
         $decodedmodel = urldecode(base64_decode($model));
         //check model + id combo exists
@@ -33,8 +34,6 @@ class PeriodicRewardsController extends Controller
         if (!$object) {
             throw new \Exception('Invalid object.');
         }
-
-        $service = new PeriodicRewardsManager;
 
         $data = $request->only([
             'group_name', 'group_quantity', 'group_operator', 'group_rewardable_type', 'group_rewardable_id', 'group_rewardable_quantity', 'reward_timeframe','default_periodic_rewards'
