@@ -125,7 +125,7 @@
                                                                 'class' => 'form-control group-table-id selectize',
                                                                 'placeholder' => 'Select Loot Table',
                                                             ]) !!}</div>
-                                                            <div class="group-raffles {{ $reward->rewardable_type == 'Raffle' ? 'show' : 'hide' }}">{!! Form::select('group_rewardable_id[' . $group->group_id . '][]', $raffles, $reward->rewardable_type == 'Raffle' ? $reward->rewardable_id : null, [
+                                                            <div class="group-raffles {{ $reward->rewardable_type == 'Raffle' ? 'show' : 'hide' }}">{!! Form::select('group_rewardable_id[' . $group->group_name . '][]', $raffles, $reward->rewardable_type == 'Raffle' ? $reward->rewardable_id : null, [
                                                                 'class' => 'form-control group-raffle-id selectize',
                                                                 'placeholder' => 'Select Raffle',
                                                             ]) !!}</div>
