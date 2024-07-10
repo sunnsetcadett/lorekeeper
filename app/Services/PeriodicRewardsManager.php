@@ -199,20 +199,15 @@ class PeriodicRewardsManager extends Service
             foreach ($object->periodicRewards as $reward) {
                 //check log count
                 if ($reward->group_operator !== 'every' && $this->checkCount($logs->count(), $reward) == true) {
-                    $grantable = true;
+                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
                 } elseif ($reward->reward_timeframe !== 'lifetime' && !$this->checkLimitReached($reward, $logs) && $this->checkCount($logs->count(), $reward) == true) {
-                    $grantable = true;
-
+                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
                 } elseif ($reward->group_operator === 'every' && $logs->count() % $reward->group_quantity === 0) {
-                    $grantable = true;
-                }
-
-                if (isset($grantable) && $grantable === true) {
                     $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
                 }
 
             }
-            if (isset($grantable)) {
+            if (isset($grant)) {
                 return $this->commitReturn($grant);
             }
             return $this->commitReturn(true);
