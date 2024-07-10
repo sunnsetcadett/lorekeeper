@@ -405,15 +405,6 @@ class SubmissionManager extends Service
             // Distribute user rewards
             if(!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData)) throw new \Exception("Failed to distribute rewards to user.");
 
-            //grant periodic rewards if applicable
-            if($submission->prompt_id && $submission->prompt->periodicRewards->count()){
-                $periodicrewards = ( new PeriodicRewardsManager)->grantPeriodicReward($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::submitted($submission->prompt_id, $submission->user->id)->get());
-
-                if(is_bool($periodicrewards)){
-                    $periodicrewards = [];
-                }
-            }
-
             // Retrieve all reward IDs for characters
             $currencyIds = []; $itemIds = []; $tableIds = [];
             if(isset($data['character_currency_id'])) {
@@ -480,6 +471,18 @@ class SubmissionManager extends Service
 				'parsed_staff_comments' => $data['parsed_staff_comments'],
                 'staff_id' => $user->id,
                 'status' => 'Approved',
+            ]);
+
+            //grant periodic rewards if applicable
+            if($submission->prompt_id && $submission->prompt->periodicRewards->count()){
+                $periodicrewards = ( new PeriodicRewardsManager)->grantPeriodicReward($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::approved($submission->prompt_id, $submission->user->id)->get());
+
+                if(is_bool($periodicrewards)){
+                    $periodicrewards = [];
+                }
+            }
+
+            $submission->update([
                 'data' => json_encode([
                     'user' => $addonData,
                     'rewards' => getDataReadyAssets($rewards),

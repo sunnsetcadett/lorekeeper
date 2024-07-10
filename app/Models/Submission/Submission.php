@@ -159,9 +159,9 @@ class Submission extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSubmitted($query, $prompt, $user)
+    public function scopeApproved($query, $prompt, $user)
     {
-        return $query->where('prompt_id', $prompt)->where('status', '!=', 'Rejected')->where('user_id', $user);
+        return $query->where('prompt_id', $prompt)->where('status', '=', 'Approved')->where('user_id', $user);
     }
 
     /**********************************************************************************************
