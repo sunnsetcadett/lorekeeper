@@ -53,7 +53,7 @@
                 </table>
             @endif
             @if (count($prompt->periodicRewards))
-                @include('widgets._periodic_loot_rewards', ['object' => $prompt, 'act_type' => 'submission', 'logs' => \App\Models\Submission\Submission::approved($prompt->id, Auth::user()->id)->get()])
+                @include('widgets._periodic_loot_rewards', ['object' => $prompt, 'act_type' => 'submission', 'logs' => Auth::check() ? \App\Models\Submission\Submission::approved($prompt->id, Auth::user()->id)->get() : null])
             @endif
         </div>
         <div class="text-right">
