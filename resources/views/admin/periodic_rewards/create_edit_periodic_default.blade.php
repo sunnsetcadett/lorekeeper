@@ -20,9 +20,7 @@
     {!! Form::open(['url' => $default->id ? 'admin/data/periodic-defaults/edit/' . $default->id : 'admin/data/periodic-defaults/create', 'files' => true]) !!}
 
     <h3>Basic Information</h3>
-    @if (!$default->id)
-        <p> You can add the rewards themselves after the default is made.</p>
-    @endif
+
     <div class="form-group">
         {!! Form::label('Name') !!}
         {!! Form::text('name', $default->name, ['class' => 'form-control']) !!}
@@ -40,9 +38,27 @@
 
     {!! Form::close() !!}
 
-    @if ($default->id)
-        @include('widgets._periodic_loot_select', ['groups' => $default->periodicRewards, 'object' => $default, 'type' => 'submission', 'default' => true])
-    @endif
+    <div class="alert alert-info"><p>You can add both user and character rewards to populate in. You can't convert character rewards to user rewards and vice versa, even when toggling on this default in the user or character reward editor, so make your decisions carefully!</div>
+
+    @include('widgets._periodic_loot_select', [
+        'object' => $default,
+        'action' => 'action',
+        'objectname' => 'default',
+        'recipient' => 'User',
+        'reward_key' => 'periodicRewards',
+        'default' => true,
+    ])
+
+    @include('widgets._periodic_loot_select', [
+        'object' => $default,
+        'action' => 'action',
+        'objectname' => 'default',
+        'recipient' => 'Character',
+        'showHr' => true,
+        'reward_key' => 'periodicCharacterRewards',
+        'default' => true,
+    ])
+
 @endsection
 
 @section('scripts')

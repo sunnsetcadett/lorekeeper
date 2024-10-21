@@ -90,7 +90,20 @@ class Prompt extends Model
      */
     public function periodicRewards()
     {
-        return $this->hasMany('App\Models\PeriodicReward', 'object_id')->where('object_type',class_basename($this));
+        return $this->hasMany('App\Models\PeriodicReward', 'object_id')->where([
+            ['object_type', class_basename($this)],
+            ['recipient_type', 'User'],
+            ['reward_key', 'periodicRewards'],
+        ]);
+    }
+
+    public function periodicCharacterRewards()
+    {
+        return $this->hasMany('App\Models\PeriodicReward', 'object_id')->where([
+            ['object_type', class_basename($this)],
+            ['recipient_type', 'Character'],
+            ['reward_key', 'periodicCharacterRewards'],
+        ]);
     }
 
     /**********************************************************************************************

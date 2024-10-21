@@ -52,9 +52,21 @@
                     </tbody>
                 </table>
             @endif
-            @if (count($prompt->periodicRewards))
-                @include('widgets._periodic_loot_rewards', ['object' => $prompt, 'act_type' => 'submission', 'logs' => Auth::check() ? \App\Models\Submission\Submission::approved($prompt->id, Auth::user()->id)->get() : null])
-            @endif
+            @include('widgets._periodic_loot_rewards', [
+                'object' => $prompt,
+                'act_type' => 'submission',
+                'logs' => Auth::check() ? \App\Models\Submission\Submission::approved($prompt->id, Auth::user()->id)->get() : null,
+                'recipient' => 'User',
+                'reward_key' => 'periodicRewards',
+            ])
+            @include('widgets._periodic_loot_rewards', [
+                'object' => $prompt,
+                'act_type' => 'submission',
+                'recipient' => 'Character',
+                'showHr' => true,
+                'reward_key' => 'periodicCharacterRewards',
+                'info' => ' Only focus characters will recieve these rewards.',
+            ])
         </div>
         <div class="text-right">
             @if ($prompt->end_at && $prompt->end_at->isPast())

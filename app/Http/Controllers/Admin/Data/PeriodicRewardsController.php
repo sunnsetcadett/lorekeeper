@@ -36,7 +36,7 @@ class PeriodicRewardsController extends Controller
         }
 
         $data = $request->only([
-            'group_name', 'group_quantity', 'group_operator', 'group_rewardable_type', 'group_rewardable_id', 'group_rewardable_quantity', 'reward_timeframe','default_periodic_rewards'
+            'group_name', 'group_quantity', 'group_operator', 'group_rewardable_type', 'group_rewardable_id', 'group_rewardable_quantity', 'reward_timeframe','default_periodic_rewards','recipient_type','reward_key'
         ]);
 
         if ($service->createPeriodicReward($object, $data)) {

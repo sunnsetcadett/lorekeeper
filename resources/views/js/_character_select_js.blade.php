@@ -78,6 +78,7 @@
             node.find('.character-currency-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-item-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-table-id').attr('name', 'character_rewardable_id[' + id + '][]');
+            node.find('.character-is-focus').attr('name', 'character_is_focus[' + id + ']');
         }
 
     });

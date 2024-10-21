@@ -546,4 +546,15 @@ class Character extends Model
                 ]);
         }
     }
+
+    /**
+     * get the character's approved submissions for a specific prompt
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function approvedSubmissions($prompt_id, $character_id)
+    {
+        return Submission::with('user.rank')->with('prompt')->where('status', 'Approved')->whereIn('id', SubmissionCharacter::where('character_id', $character_id)->pluck('submission_id')->toArray())->where('prompt_id', $prompt_id)->where('status', 'Approved');
+    }
 }

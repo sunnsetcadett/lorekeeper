@@ -15,7 +15,7 @@ class SubmissionCharacter extends Model
      * @var array
      */
     protected $fillable = [
-        'submission_id', 'character_id', 'data'
+        'submission_id', 'character_id', 'data', 'is_focus','periodic_data'
     ];
 
     /**
@@ -85,5 +85,15 @@ class SubmissionCharacter extends Model
             }
         }
         return $rewards;
+    }
+
+    /**
+     * Get the data attribute as an associative array.
+     *
+     * @return array
+     */
+    public function getPeriodicDataAttribute()
+    {
+        return json_decode($this->attributes['periodic_data'], true);
     }
 }

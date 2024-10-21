@@ -13,7 +13,7 @@ class PeriodicRewardLog extends Model
      * @var array
      */
     protected $fillable = [
-        'object_id', 'object_type', 'user_id',
+        'object_id', 'object_type', 'user_id','user_type','log_key'
     ];
 
     /**
@@ -51,7 +51,8 @@ class PeriodicRewardLog extends Model
      */
     public function user()
     {
-        return $this->belongsTo('App\Models\User\User', 'user_id');
+        if($this->user_type == 'User')return $this->belongsTo('App\Models\User\User', 'user_id');
+        else return $this->belongsTo('App\Models\Character\Character', 'user_id');
     }
 
     /**
@@ -77,9 +78,15 @@ class PeriodicRewardLog extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeLogCount($query, $object, $user)
+    public function scopeLogCount($query, $object, $user, $logKey)
     {
-        return $query->where('object_id', $object->id)->where('user_id', $user->id)->where('object_type', class_basename($object));
+        return $query->where([
+            ['object_id', $object->id],
+            ['user_id', $user->id],
+            ['object_type', class_basename($object)],
+            ['user_type', $user->logType],
+            ['log_key', $logKey],
+        ]);
     }
 
 }

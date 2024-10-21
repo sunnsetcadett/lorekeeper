@@ -12,7 +12,7 @@ class PeriodicReward extends Model
      *
      * @var array
      */
-    protected $fillable = ['object_id', 'object_type', 'data', 'group_name', 'group_operator', 'group_quantity', 'reward_timeframe'];
+    protected $fillable = ['object_id', 'object_type', 'data', 'group_name', 'group_operator', 'group_quantity', 'reward_timeframe','recipient_type','reward_key'];
 
     /**
      * The table associated with the model.

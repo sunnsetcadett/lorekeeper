@@ -33,6 +33,13 @@ class PeriodicRewardsManager extends Service
         DB::beginTransaction();
 
         try {
+            if(!isset($data['reward_key'])){
+                throw new \Exception('You must set a reward key.');
+            }
+            if(!isset($data['recipient_type'])){
+                throw new \Exception('You must select a recipient.');
+            }
+
             $groups = [];
             if (isset($data['group_name'])) {
                 foreach ($data['group_name'] as $key => $id) {
@@ -60,7 +67,6 @@ class PeriodicRewardsManager extends Service
                     ];
                 }
             }
-
             // Retrieve all reward IDs for groups
             $currencyIds = [];
             $itemIds = [];
@@ -97,7 +103,10 @@ class PeriodicRewardsManager extends Service
             $raffles = Raffle::whereIn('id', $raffleIds)->where('rolled_at', null)->where('is_active', 1)->get()->keyBy('id');
 
             // We're going to remove all groups and reattach them with the updated data
-            $object->periodicRewards()->delete();
+
+            //update the key variable because for some reason it doesn't like being called directly?????????????
+            $rewardkey = $data['reward_key'];
+            $object->$rewardkey()->delete();
 
             // Attach groups
             foreach ($groups as $c) {
@@ -114,6 +123,8 @@ class PeriodicRewardsManager extends Service
                     'group_name' => $c->group_name,
                     'reward_timeframe' => $c->reward_timeframe,
                     'data' => json_encode(getDataReadyAssets($assets)),
+                    'recipient_type' => $data['recipient_type'],
+                    'reward_key' => $data['reward_key'],
                 ]);
             }
 
@@ -183,7 +194,7 @@ class PeriodicRewardsManager extends Service
  * @param  int|null                    $id
  * @return \Illuminate\Http\RedirectResponse
  */
-    public function grantPeriodicReward($object, $user, $recipient, $logtype, $logdata, $logs)
+    public function grantPeriodicReward($object, $user, $recipient, $logtype, $logdata, $logs, $rewardKey, $isCharacter = false)
     {
         DB::beginTransaction();
 
@@ -196,14 +207,14 @@ class PeriodicRewardsManager extends Service
                 throw new \Exception("Invalid recipient.");
             }
 
-            foreach ($object->periodicRewards as $reward) {
+            foreach ($object->$rewardKey as $reward) {
                 //check log count
                 if ($reward->group_operator !== 'every' && $this->checkCount($logs->count(), $reward) == true) {
-                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
+                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata, $isCharacter);
                 } elseif ($reward->reward_timeframe !== 'lifetime' && !$this->checkLimitReached($reward, $logs) && $this->checkCount($logs->count(), $reward) == true) {
-                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
+                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata, $isCharacter);
                 } elseif ($reward->group_operator === 'every' && $logs->count() % $reward->group_quantity === 0) {
-                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata);
+                    $grant = $this->grantRewards($reward, $user, $recipient, $logtype, $logdata, $isCharacter);
                 }
 
             }
@@ -225,16 +236,24 @@ class PeriodicRewardsManager extends Service
      * @param  int|null                    $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function grantRewards($reward, $user, $recipient, $logtype, $logdata)
+    public function grantRewards($reward, $user, $recipient, $logtype, $logdata, $isCharacter = false)
     {
         DB::beginTransaction();
 
         try {
-            // Distribute user rewards
-            if (!$rewards = fillUserAssets(parseAssetData($reward->data), $user, $recipient, $logtype, $logdata)) {
-                throw new \Exception("Failed to distribute rewards to user.");
+            if ($isCharacter) {
+                // Distribute character rewards
+                if (!($rewards = fillCharacterAssets(parseAssetData($reward->data), null, $recipient, $logtype, $logdata, $user))) {
+                    throw new \Exception('Failed to distribute rewards to character.');
+                }
+            } else {
+                // Distribute user rewards
+                if (!$rewards = fillUserAssets(parseAssetData($reward->data), $user, $recipient, $logtype, $logdata)) {
+                    throw new \Exception("Failed to distribute rewards to user.");
+                }
             }
-            flash('Periodic rewards granted successfully.')->success();
+
+            flash(($isCharacter ? 'Character' : 'User') . ' periodic rewards granted successfully.')->success();
 
             return $this->commitReturn($rewards);
         } catch (\Exception $e) {
@@ -250,7 +269,7 @@ class PeriodicRewardsManager extends Service
      * @param  int|null                    $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function makeLog($object, $user)
+    public function makeLog($object, $recipient, $logKey)
     {
         DB::beginTransaction();
 
@@ -259,15 +278,17 @@ class PeriodicRewardsManager extends Service
                 throw new \Exception("Invalid object.");
             }
 
-            if (!$user) {
-                throw new \Exception("Invalid user.");
+            if (!$recipient) {
+                throw new \Exception("Invalid recipient.");
             }
 
             // make a log of the action.
             $Log = PeriodicRewardLog::create([
                 'object_id' => $object->id,
                 'object_type' => class_basename($object),
-                'user_id' => $user->id,
+                'user_id' => $recipient->id,
+                'log_key' => $logKey,
+                'user_type' => $recipient->logType,
             ]);
 
             return $this->commitReturn(true);
@@ -342,6 +363,7 @@ class PeriodicRewardsManager extends Service
 
         try {
             $default->periodicRewards()->delete();
+            $default->periodicCharacterRewards()->delete();
 
             $default->delete();
 
@@ -358,14 +380,28 @@ class PeriodicRewardsManager extends Service
     public function populateDefaults($data, $object)
     {
         foreach (array_filter($data['default_periodic_rewards']) as $key => $toggle) {
-            $default = PeriodicDefault::find($key);
-            foreach ($default->periodicRewards as $default) {
-                //duplicate that mf
-                $duplicate = $default->replicate();
-                $duplicate->object_type = class_basename($object);
-                $duplicate->object_id = $object->id;
+            $pdefault = PeriodicDefault::find($key);
 
-                $duplicate->save();
+            //i'm not going to account for custom reward keys here but you can do similar to populate them in
+            if($pdefault->periodicRewards()->count()){
+                foreach ($pdefault->periodicRewards as $default) {
+                    //duplicate that mf
+                    $duplicate = $default->replicate();
+                    $duplicate->object_type = class_basename($object);
+                    $duplicate->object_id = $object->id;
+
+                    $duplicate->save();
+                }
+            }
+            if($pdefault->periodicCharacterRewards()->count()){
+                foreach ($pdefault->periodicCharacterRewards as $default) {
+                    //duplicate that mf
+                    $duplicate = $default->replicate();
+                    $duplicate->object_type = class_basename($object);
+                    $duplicate->object_id = $object->id;
+
+                    $duplicate->save();
+                }
             }
         }
     }

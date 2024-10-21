@@ -170,7 +170,8 @@ class SubmissionManager extends Service
                 SubmissionCharacter::create([
                     'character_id' => $c->id,
                     'submission_id' => $submission->id,
-                    'data' => json_encode(getDataReadyAssets($assets))
+                    'data' => json_encode(getDataReadyAssets($assets)),
+                    'is_focus'      => isset($data['character_is_focus']) && $data['character_is_focus'][$c->id] ? $data['character_is_focus'][$c->id] : 0,
                 ]);
             }
 
@@ -445,11 +446,24 @@ class SubmissionManager extends Service
 
                 if(!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) throw new \Exception("Failed to distribute rewards to character.");
 
+                //add the preset character rewards with any character rewards in data
+                if (isset($submission->prompt_id) && $submission->prompt_id && $submission->prompt->periodicCharacterRewards->count() && isset($data['character_is_focus']) && $data['character_is_focus'][$c->id]) {
+                    $charperiodicrewards = (new PeriodicRewardsManager)->grantPeriodicReward($submission->prompt, $user, $c, $promptLogType, $promptData, $c->approvedSubmissions($submission->prompt_id, $c->id)->get(), 'periodicCharacterRewards', true);
+
+                    if (is_bool($charperiodicrewards)) {
+                        $charperiodicrewards = [];
+                    }
+                }
+
                 SubmissionCharacter::create([
                     'character_id' => $c->id,
                     'submission_id' => $submission->id,
-                    'data' => json_encode(getDataReadyAssets($assets))
+                    'data' => json_encode(getDataReadyAssets($assets)),
+                    'is_focus'      => isset($data['character_is_focus']) && $data['character_is_focus'][$c->id] ? $data['character_is_focus'][$c->id] : 0,
+                    'periodic_data' => isset($charperiodicrewards) && $charperiodicrewards ? json_encode(getDataReadyAssets($charperiodicrewards)) : null
                 ]);
+
+                unset($charperiodicrewards);
             }
 
             // Increment user submission count if it's a prompt
@@ -475,7 +489,7 @@ class SubmissionManager extends Service
 
             //grant periodic rewards if applicable
             if($submission->prompt_id && $submission->prompt->periodicRewards->count()){
-                $periodicrewards = ( new PeriodicRewardsManager)->grantPeriodicReward($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::approved($submission->prompt_id, $submission->user->id)->get());
+                $periodicrewards = ( new PeriodicRewardsManager)->grantPeriodicReward($submission->prompt, $user, $submission->user, $promptLogType, $promptData, Submission::approved($submission->prompt_id, $submission->user->id)->get(), 'periodicRewards');
 
                 if(is_bool($periodicrewards)){
                     $periodicrewards = [];
